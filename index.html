@@ -334,9 +334,10 @@
     }
 
     .ws-item.active {
-      background: rgba(232, 213, 163, .12);
+      background: rgba(232, 213, 163, .18);
       color: var(--accent);
-      font-weight: 600
+      font-weight: 700;
+      border-left: 3px solid var(--accent2)
     }
 
     /* Workspace colored cards */
@@ -344,31 +345,52 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: .6rem .75rem;
+      padding: .65rem .75rem;
       border-radius: 10px;
       cursor: pointer;
-      transition: all .15s;
-      font-size: .88rem;
+      transition: all .2s;
+      font-size: .9rem;
+      font-weight: 500;
       border: none;
       width: 100%;
       text-align: left;
       font-family: 'DM Sans', sans-serif;
-      margin-bottom: 4px;
-      border-left: 3px solid transparent
+      margin-bottom: 5px;
+      border-left: 3px solid transparent;
+      color: var(--text2)
     }
 
-    .ws-card:hover { filter: brightness(1.15); background-color: rgba(255,255,255,.04) }
-    .ws-card.active { filter: brightness(1.2); font-weight: 600; opacity: 1 }
+    .ws-card:hover {
+      background-color: rgba(255,255,255,.06) !important;
+      color: var(--text)
+    }
+
+    .ws-card.active {
+      font-weight: 700;
+      font-size: .92rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08)
+    }
 
     .ws-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: .9rem;
+      font-size: 1.1rem;
       flex-shrink: 0
+    }
+
+    /* Active indicator dot on ws-card */
+    .ws-card.active::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      opacity: .7
     }
 
     .ws-count {
@@ -1774,23 +1796,25 @@
       const container = document.getElementById('ws-list');
       const allCount = all.filter(t => !t.completed).length;
 
-      // Use 25% opacity for regular ws cards, 35% for active
-      let html = `<button class="ws-card ${currentWsId === 'all' ? 'active' : ''}" onclick="selectWorkspace('all')"
-        style="background:${currentWsId === 'all' ? 'rgba(232,213,163,.35)' : 'rgba(232,213,163,.25)'};border-left-color:#e8d5a3;color:${currentWsId === 'all' ? 'var(--accent)' : 'var(--text)'}">
-    <span class="ws-icon" style="background:rgba(232,213,163,.2);font-size:.75rem;color:var(--accent)">✦</span>
-    <span style="flex:1">All Tasks</span>
-    <span class="ws-count">${allCount}</span>
-  </button>`;
+      const allActive = currentWsId === 'all';
+      let html = `<button class="ws-card ${allActive ? 'active' : ''}" onclick="selectWorkspace('all')"
+        style="background:${allActive ? 'rgba(232,213,163,.28)' : 'rgba(232,213,163,.08)'};border-left-color:#e8d5a3;color:${allActive ? '#e8d5a3' : 'var(--text2)'}">
+        <span class="ws-icon" style="background:rgba(232,213,163,.25);font-size:1rem;color:#e8d5a3">✦</span>
+        <span style="flex:1;font-size:.9rem">All Tasks</span>
+        <span class="ws-count" style="background:rgba(232,213,163,.18);color:#c4a35a">${allCount}</span>
+        ${allActive ? '<span style="font-size:.9rem;opacity:.9">◀</span>' : ''}
+      </button>`;
 
       workspaces.forEach(ws => {
         const count = all.filter(t => !t.completed && t.workspace === ws.id).length;
         const hex = ws.color || '#e8d5a3';
         const isActive = currentWsId === ws.id;
         html += `<button class="ws-card ${isActive ? 'active' : ''}" onclick="selectWorkspace('${ws.id}')"
-          style="background:${isActive ? hex + '59' : hex + '40'};border-left-color:${hex};color:${isActive ? hex : 'var(--text)'}">
-          <span class="ws-icon" style="background:${hex}40">${ws.icon}</span>
-          <span style="flex:1">${esc(ws.name)}</span>
-          <span class="ws-count" style="background:${hex}30;color:${hex}">${count}</span>
+          style="background:${isActive ? hex + '38' : hex + '12'};border-left-color:${hex};color:${isActive ? hex : 'var(--text2)'}">
+          <span class="ws-icon" style="background:${hex}${isActive ? '45' : '28'};font-size:1.1rem">${ws.icon}</span>
+          <span style="flex:1;font-size:.9rem">${esc(ws.name)}</span>
+          <span class="ws-count" style="background:${hex}25;color:${hex}">${count}</span>
+          ${isActive ? `<span style="font-size:.85rem;color:${hex};opacity:.9">◀</span>` : ''}
         </button>`;
       });
 
@@ -2467,7 +2491,7 @@
       if (idx >= 0) tasks[idx] = task; else tasks.unshift(task);
       persistTask(task);
       scheduleAllReminders();
-      closeModal(); renderTasks();
+      closeModal(true); renderTasks();
       showToast(editingId ? 'Task updated ✓' : 'Task saved ✓');
     };
 
