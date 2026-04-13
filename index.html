@@ -1368,9 +1368,13 @@
           </div>
 
           <!-- Page tabs (horizontal strip) -->
-          <div id="page-tabs-wrap" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem">
-            <div id="page-tabs" style="display:flex;gap:6px;flex-wrap:wrap;flex:1"></div>
-            <button id="add-page-btn-main" class="btn-ghost" style="font-size:.8rem;padding:.35rem .75rem;white-space:nowrap" onclick="addPageFromMain()">＋ Page</button>
+          <div id="page-tabs-wrap" style="display:none;align-items:center;gap:6px;margin-bottom:1.25rem;min-width:0">
+            <button id="pg-scroll-left" onclick="scrollPageTabs(-1)" style="display:none;flex-shrink:0;background:none;border:1px solid var(--border);border-radius:50%;width:28px;height:28px;cursor:pointer;color:var(--text2);font-size:.9rem;line-height:1">‹</button>
+            <div id="page-tabs-scroll" style="display:flex;gap:6px;overflow:hidden;flex:1;min-width:0;scroll-behavior:smooth">
+              <div id="page-tabs" style="display:flex;gap:6px;flex-shrink:0"></div>
+            </div>
+            <button id="pg-scroll-right" onclick="scrollPageTabs(1)" style="display:none;flex-shrink:0;background:none;border:1px solid var(--border);border-radius:50%;width:28px;height:28px;cursor:pointer;color:var(--text2);font-size:.9rem;line-height:1">›</button>
+            <button id="add-page-btn-main" class="btn-ghost" style="flex-shrink:0;font-size:.8rem;padding:.35rem .75rem;white-space:nowrap" onclick="addPageFromMain()">＋ Page</button>
           </div>
 
           <div class="add-bar">
@@ -1869,6 +1873,8 @@
               <span onclick="event.stopPropagation();deletePage('${ws.id}','${pg.id}')" style="margin-left:5px;opacity:.4;font-size:.7rem;cursor:pointer" title="Delete page">✕</span>
             </button>`;
           }).join('');
+          // Show/hide scroll arrows after render
+          setTimeout(updatePgScrollArrows, 0);
         } else {
           pageTabsWrap.style.display = 'none';
         }
@@ -1883,6 +1889,25 @@
         if (currentWsId !== 'all') sel.value = currentWsId;
       }
     }
+
+    function updatePgScrollArrows() {
+      const scroller = document.getElementById('page-tabs-scroll');
+      const leftBtn = document.getElementById('pg-scroll-left');
+      const rightBtn = document.getElementById('pg-scroll-right');
+      if (!scroller || !leftBtn || !rightBtn) return;
+      const overflow = scroller.scrollWidth > scroller.clientWidth + 2;
+      leftBtn.style.display = overflow ? 'flex' : 'none';
+      rightBtn.style.display = overflow ? 'flex' : 'none';
+      leftBtn.style.alignItems = 'center';
+      leftBtn.style.justifyContent = 'center';
+      rightBtn.style.alignItems = 'center';
+      rightBtn.style.justifyContent = 'center';
+    }
+
+    window.scrollPageTabs = function (dir) {
+      const scroller = document.getElementById('page-tabs-scroll');
+      if (scroller) scroller.scrollBy({ left: dir * 200, behavior: 'smooth' });
+    };
 
     window.selectWorkspace = function (id) {
       currentWsId = id;
