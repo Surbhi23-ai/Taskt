@@ -2128,8 +2128,14 @@
     // Realtime — auto-refresh on any change
     function subscribeRealtime() {
       if (DEMO_MODE || !supabase_client) return;
+      // Tear down any existing subscription + remove the named channel before re-subscribing
+      if (realtimeSub) {
+        realtimeSub.unsubscribe();
+        supabase_client.removeChannel(realtimeSub);
+        realtimeSub = null;
+      }
       realtimeSub = supabase_client
-        .channel('tasks-changes')
+        .channel('tasks-changes-' + Date.now()) // unique name avoids reuse of old channel
         .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => loadTasks())
         .subscribe();
     }
