@@ -1553,8 +1553,9 @@
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
             <label style="margin:0">Subtasks <span style="font-size:.7rem;color:var(--text3);font-weight:400">(optional)</span></label>
             <div style="display:flex;gap:4px">
-              <button id="st-mode-check" class="btn-ghost" style="padding:.2rem .6rem;font-size:.75rem;opacity:1" onclick="setSubtaskMode('checkbox')" title="Checkbox mode">☑</button>
-              <button id="st-mode-bullet" class="btn-ghost" style="padding:.2rem .6rem;font-size:.75rem;opacity:.4" onclick="setSubtaskMode('bullet')" title="Bullet mode">•</button>
+              <button id="st-mode-check" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:1" onclick="setSubtaskMode('checkbox')">☑ Checkbox</button>
+              <button id="st-mode-bullet" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:.4" onclick="setSubtaskMode('bullet')">• Bullet</button>
+              <button id="st-mode-number" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:.4" onclick="setSubtaskMode('number')">1. Number</button>
             </div>
           </div>
           <div class="subtask-list" id="subtask-list"></div>
@@ -1732,9 +1733,10 @@
     function applySubtaskModeUI() {
       const cb = document.getElementById('st-mode-check');
       const bl = document.getElementById('st-mode-bullet');
-      if (!cb || !bl) return;
-      cb.style.opacity = subtaskMode === 'checkbox' ? '1' : '.4';
-      bl.style.opacity = subtaskMode === 'bullet' ? '1' : '.4';
+      const nb = document.getElementById('st-mode-number');
+      if (cb) cb.style.opacity = subtaskMode === 'checkbox' ? '1' : '.4';
+      if (bl) bl.style.opacity = subtaskMode === 'bullet' ? '1' : '.4';
+      if (nb) nb.style.opacity = subtaskMode === 'number' ? '1' : '.4';
     }
 
     window.signInWithGoogle = async function () {
@@ -2486,7 +2488,14 @@
       document.getElementById('subtask-list').innerHTML = subtasks.map((s, i) => {
         if (subtaskMode === 'bullet') {
           return `<div class="subtask-row">
-            <span style="color:var(--accent2);font-size:1rem;line-height:1">•</span>
+            <span style="color:var(--accent2);font-size:1rem;line-height:1;flex-shrink:0">•</span>
+            <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
+            <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
+          </div>`;
+        }
+        if (subtaskMode === 'number') {
+          return `<div class="subtask-row">
+            <span style="color:var(--text3);font-size:.8rem;min-width:18px;text-align:right;flex-shrink:0">${i + 1}.</span>
             <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
             <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
           </div>`;
