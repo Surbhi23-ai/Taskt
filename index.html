@@ -1731,12 +1731,15 @@
     };
 
     function applySubtaskModeUI() {
-      const cb = document.getElementById('st-mode-check');
-      const bl = document.getElementById('st-mode-bullet');
-      const nb = document.getElementById('st-mode-number');
-      if (cb) cb.style.opacity = subtaskMode === 'checkbox' ? '1' : '.4';
-      if (bl) bl.style.opacity = subtaskMode === 'bullet' ? '1' : '.4';
-      if (nb) nb.style.opacity = subtaskMode === 'number' ? '1' : '.4';
+      const btns = { checkbox: 'st-mode-check', bullet: 'st-mode-bullet', number: 'st-mode-number' };
+      Object.entries(btns).forEach(([mode, id]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const active = subtaskMode === mode;
+        btn.style.opacity = active ? '1' : '.4';
+        btn.style.border = active ? '1.5px solid var(--accent)' : '1px solid var(--border)';
+        btn.style.color = active ? 'var(--accent)' : '';
+      });
     }
 
     window.signInWithGoogle = async function () {
