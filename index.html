@@ -1861,10 +1861,12 @@
           pageTabs.innerHTML = pages.map(pg => {
             const pgColor = pg.color || '#e8d5a3';
             const isActivePg = currentPageId === pg.id;
-            return `<button class="pg-tab ${isActivePg ? 'active' : ''}" onclick="selectPage('${pg.id}')"
-              style="${isActivePg ? `background:${pgColor};border-color:transparent;color:#111` : `border-color:${pgColor}44;color:var(--text2)`}">
+            const activeStyle = `background:${pgColor};border-color:${pgColor};color:#111;font-weight:600;box-shadow:0 0 0 3px ${pgColor}44`;
+            const inactiveStyle = `background:${pgColor}18;border-color:${pgColor};color:${pgColor}`;
+            return `<button class="pg-tab" onclick="selectPage('${pg.id}')"
+              style="${isActivePg ? activeStyle : inactiveStyle}">
               <span style="font-size:.9rem">${pg.icon || '📄'}</span> ${esc(pg.name)}
-              <span onclick="event.stopPropagation();deletePage('${ws.id}','${pg.id}')" style="margin-left:5px;opacity:.45;font-size:.72rem;cursor:pointer" title="Delete page">✕</span>
+              <span onclick="event.stopPropagation();deletePage('${ws.id}','${pg.id}')" style="margin-left:5px;opacity:.5;font-size:.72rem;cursor:pointer" title="Delete page">✕</span>
             </button>`;
           }).join('');
         } else {
