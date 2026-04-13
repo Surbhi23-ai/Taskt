@@ -1561,10 +1561,11 @@
         </div>
 
         <!-- Share -->
-        <div class="form-group">
+        <div class="form-group" id="share-section">
           <label>👥 Share with (email addresses)</label>
+          <div id="shared-by-info" style="display:none;font-size:.8rem;color:var(--accent);background:var(--surface2);padding:.5rem .75rem;border-radius:8px;margin-bottom:8px"></div>
           <div class="share-list" id="share-list"></div>
-          <div style="display:flex;gap:8px">
+          <div id="share-add-row" style="display:flex;gap:8px">
             <input class="form-input" id="share-email-input" placeholder="colleague@gmail.com" style="flex:1"
               onkeydown="if(event.key==='Enter')addShareEmail()">
             <button class="btn-ghost" onclick="addShareEmail()">Add</button>
@@ -2100,6 +2101,7 @@
         tags: task.tags || [],
         reminders: task.reminders || [],
         shared_with: task.sharedWith || [],
+        owner_email: task.ownerEmail || currentUser.email.toLowerCase().trim(),
         workspace: task.workspace || null,
         completed: task.completed || false,
         subtasks: task.subtasks || [],
@@ -2109,7 +2111,7 @@
         updated_at: new Date().toISOString()
       };
       const { error } = await supabase_client.from('tasks').upsert(row);
-      if (error) showToast('Save error: ' + error.message);
+      if (error) { console.error('Save error:', error); showToast('Save error: ' + error.message); }
     }
 
     async function removeTaskDB(id) {
@@ -2139,6 +2141,7 @@
         tags: r.tags || [],
         reminders: r.reminders || [],
         sharedWith: r.shared_with || [],
+        ownerEmail: r.owner_email || '',
         workspace: r.workspace || '',
         completed: r.completed || false,
         subtasks: r.subtasks || [],
@@ -2364,10 +2367,27 @@
         subtasks = JSON.parse(JSON.stringify(t.subtasks || []));
         subtaskMode = t.subtaskMode || 'checkbox';
         pastedImages = [...(t.images || [])];
+        // Show owner info for shared tasks
+        const isSharedTask = t.uid !== currentUser?.id;
+        const shareSection = document.getElementById('share-section');
+        const shareAddRow = document.getElementById('share-add-row');
+        const sharedByInfo = document.getElementById('shared-by-info');
+        if (shareSection) shareSection.style.display = 'block';
+        if (isSharedTask) {
+          if (shareAddRow) shareAddRow.style.display = 'none';
+          if (sharedByInfo) { sharedByInfo.style.display = 'block'; sharedByInfo.textContent = '📨 Shared by: ' + (t.ownerEmail || 'task owner'); }
+        } else {
+          if (shareAddRow) shareAddRow.style.display = 'flex';
+          if (sharedByInfo) sharedByInfo.style.display = 'none';
+        }
       } else {
         ['m-title', 'm-notes', 'm-due', 'm-tags'].forEach(i => document.getElementById(i).value = '');
         document.getElementById('m-priority').value = 'medium';
         document.getElementById('m-workspace').value = currentWsId !== 'all' ? currentWsId : '';
+        const shareAddRow = document.getElementById('share-add-row');
+        const sharedByInfo = document.getElementById('shared-by-info');
+        if (shareAddRow) shareAddRow.style.display = 'flex';
+        if (sharedByInfo) sharedByInfo.style.display = 'none';
       }
 
       renderReminderRows(); renderShareChips(); renderSubtasks(); renderPastedImages(); applySubtaskModeUI();
@@ -2467,8 +2487,10 @@
     };
 
     function renderShareChips() {
+      const t = editingId ? getTaskList().find(x => x.id === editingId) : null;
+      const isSharedTask = t && t.uid !== currentUser?.id;
       document.getElementById('share-list').innerHTML = shareList.map((e, i) => `
-    <div class="share-chip"><span>📧 ${e}</span><button onclick="removeShare(${i})">✕</button></div>`).join('');
+    <div class="share-chip"><span>📧 ${e}</span>${isSharedTask ? '' : `<button onclick="removeShare(${i})">✕</button>`}</div>`).join('');
     }
 
     window.removeShare = i => { shareList.splice(i, 1); renderShareChips(); };
@@ -2542,13 +2564,14 @@
       const task = {
         id: editingId || crypto.randomUUID(),
         uid: existing?.uid || currentUser.id,
+        ownerEmail: existing?.ownerEmail || currentUser.email.toLowerCase().trim(),
         title,
         notes: document.getElementById('m-notes').value.trim(),
         dueDate: document.getElementById('m-due').value,
         priority: document.getElementById('m-priority').value,
         tags,
         reminders: JSON.parse(JSON.stringify(reminders)),
-        sharedWith: [...shareList],
+        sharedWith: existing && existing.uid !== currentUser.id ? existing.sharedWith : [...shareList],
         subtasks: JSON.parse(JSON.stringify(subtasks)),
         subtaskMode,
         images: [...pastedImages],
