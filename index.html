@@ -2096,9 +2096,11 @@
     // ─────────────────────────────────────────────
     async function loadTasks() {
       if (DEMO_MODE || !supabase_client) return;
+      const email = currentUser.email;
       const { data, error } = await supabase_client
         .from('tasks')
         .select('*')
+        .or(`uid.eq.${currentUser.id},shared_with.cs.{"${email}"}`)
         .order('created_at', { ascending: false });
       if (error) { showToast('Load error: ' + error.message); return; }
       tasks = data || [];
