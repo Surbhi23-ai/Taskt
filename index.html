@@ -159,7 +159,9 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border);
-      background: var(--surface);
+      background: rgba(24, 24, 24, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       position: sticky;
       top: 0;
       z-index: 100
@@ -224,7 +226,7 @@
     #sidebar {
       width: 220px;
       flex-shrink: 0;
-      background: var(--surface);
+      background: #1c1c1c;
       border-right: 1px solid var(--border);
       padding: 1.25rem 0;
       display: flex;
@@ -355,8 +357,8 @@
       border-left: 3px solid transparent
     }
 
-    .ws-card:hover { filter: brightness(1.1) }
-    .ws-card.active { filter: brightness(1.15); font-weight: 600 }
+    .ws-card:hover { filter: brightness(1.15); background-color: rgba(255,255,255,.04) }
+    .ws-card.active { filter: brightness(1.2); font-weight: 600; opacity: 1 }
 
     .ws-icon {
       width: 28px;
@@ -407,7 +409,8 @@
 
     #main-content {
       flex: 1;
-      min-width: 0
+      min-width: 0;
+      transition: background 0.3s ease
     }
 
     /* WORKSPACE MODAL */
@@ -549,18 +552,19 @@
     .add-input {
       flex: 1;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: .8rem 1.1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: .85rem 1.25rem;
       color: var(--text);
       font-size: .95rem;
       font-family: 'DM Sans', sans-serif;
-      transition: border-color .2s
+      transition: border-color .2s, box-shadow .2s
     }
 
     .add-input:focus {
       outline: none;
-      border-color: var(--accent2)
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(232,213,163,.1)
     }
 
     .add-input::placeholder {
@@ -596,14 +600,15 @@
     .task-item {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 14px;
       padding: 1rem 1.1rem;
       display: flex;
       align-items: flex-start;
       gap: 12px;
       transition: all .2s;
       animation: slideIn .25s ease;
-      position: relative
+      position: relative;
+      border-left: 3px solid var(--ws-color, var(--border))
     }
 
     @keyframes slideIn {
@@ -619,7 +624,8 @@
     }
 
     .task-item:hover {
-      background: var(--surface2)
+      background: var(--surface2);
+      box-shadow: 0 4px 20px rgba(0,0,0,.35)
     }
 
     .task-item.completed {
@@ -1204,6 +1210,70 @@
         opacity: 1
       }
     }
+
+    /* PAGES IN SIDEBAR */
+    .pages-section { padding: 0 .75rem; margin-top: 4px; margin-bottom: .5rem }
+    .page-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: .4rem .6rem .4rem 1.5rem;
+      border-radius: 8px; cursor: pointer;
+      font-size: .82rem; color: var(--text3);
+      border: none; background: none; width: 100%;
+      text-align: left; font-family: 'DM Sans', sans-serif;
+      transition: all .15s; position: relative
+    }
+    .page-item:hover { background: var(--surface2); color: var(--text2) }
+    .page-item.active { background: rgba(255,255,255,.06); color: var(--text); font-weight: 500 }
+    .page-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: .5 }
+    .page-item .page-del {
+      margin-left: auto; background: none; border: none; color: var(--text3);
+      cursor: pointer; font-size: .7rem; opacity: 0; padding: 2px 4px; border-radius: 4px
+    }
+    .page-item:hover .page-del { opacity: 1 }
+    .add-page-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: .35rem .6rem .35rem 1.5rem;
+      border-radius: 8px; cursor: pointer;
+      font-size: .78rem; color: var(--text3);
+      border: none; background: none; width: 100%;
+      font-family: 'DM Sans', sans-serif; transition: all .15s
+    }
+    .add-page-btn:hover { color: var(--accent); background: rgba(232,213,163,.06) }
+
+    /* WORKSPACE BANNER */
+    #ws-banner {
+      display: none;
+      align-items: center; gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 14px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--accent)
+    }
+    #ws-banner .banner-icon { font-size: 2rem; line-height: 1 }
+    #ws-banner .banner-title { font-family: 'Playfair Display',serif; font-size: 1.6rem }
+    #ws-banner .banner-sub { font-size: .8rem; color: var(--text2); margin-top: 2px }
+
+    /* PAGE TABS */
+    #page-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 1.25rem
+    }
+    #page-tabs .pg-tab {
+      padding: .35rem 1rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      font-size: .8rem; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s
+    }
+    #page-tabs .pg-tab.active {
+      background: var(--ws-color, var(--accent));
+      border-color: transparent;
+      color: #111; font-weight: 600
+    }
+    #page-tabs .pg-tab:hover:not(.active) { border-color: var(--ws-color, var(--accent)); color: var(--text) }
   </style>
 </head>
 
@@ -1302,6 +1372,18 @@
             <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> below.
           </div>
 
+          <!-- Workspace banner (shown when workspace selected) -->
+          <div id="ws-banner">
+            <div class="banner-icon" id="banner-icon">💼</div>
+            <div>
+              <div class="banner-title" id="banner-title">Workspace</div>
+              <div class="banner-sub" id="banner-sub">0 active tasks</div>
+            </div>
+            <div style="margin-left:auto">
+              <button class="btn-ghost" id="edit-ws-btn-banner" onclick="editCurrentWs()">✎ Edit</button>
+            </div>
+          </div>
+
           <!-- Workspace header -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
             <div>
@@ -1314,6 +1396,9 @@
               <button class="btn-ghost" id="edit-ws-btn" onclick="editCurrentWs()" style="display:none">✎ Edit</button>
             </div>
           </div>
+
+          <!-- Page tabs (horizontal strip) -->
+          <div id="page-tabs" style="display:none"></div>
 
           <div class="add-bar">
             <input class="add-input" id="quick-input" placeholder="Type a task name and press Enter or + Add…"
@@ -1432,6 +1517,12 @@
             <option value="">— No workspace —</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Page</label>
+          <select class="form-select" id="m-page">
+            <option value="">— No page —</option>
+          </select>
+        </div>
 
         <!-- Subtasks -->
         <div class="form-group">
@@ -1512,15 +1603,16 @@
     // ── WORKSPACES ──
     let workspaces = [];
     let currentWsId = 'all'; // 'all' = no filter
+    let currentPageId = null; // null = all pages in workspace
     let editingWsId = null;
     let selectedEmoji = '💼';
     let selectedColor = '#e8d5a3';
 
     // Default workspaces (seeded on first login)
     const DEFAULT_WS = [
-      { id: 'ws-work', name: 'Work', icon: '💼', color: '#7ab8e8' },
-      { id: 'ws-personal', name: 'Personal', icon: '🏠', color: '#7ec8a0' },
-      { id: 'ws-shared', name: 'Shared', icon: '👥', color: '#e8a87c' },
+      { id: 'ws-work', name: 'Work', icon: '💼', color: '#7ab8e8', pages: [{ id: 'ws-work-general', name: 'General' }] },
+      { id: 'ws-personal', name: 'Personal', icon: '🏠', color: '#7ec8a0', pages: [{ id: 'ws-personal-general', name: 'General' }] },
+      { id: 'ws-shared', name: 'Shared', icon: '👥', color: '#e8a87c', pages: [{ id: 'ws-shared-general', name: 'General' }] },
     ];
 
     if (!DEMO_MODE) {
@@ -1682,9 +1774,10 @@
       const container = document.getElementById('ws-list');
       const allCount = all.filter(t => !t.completed).length;
 
+      // Use 25% opacity for regular ws cards, 35% for active
       let html = `<button class="ws-card ${currentWsId === 'all' ? 'active' : ''}" onclick="selectWorkspace('all')"
-        style="background:rgba(232,213,163,.08);border-left-color:#e8d5a3;color:var(--text)">
-    <span class="ws-icon" style="background:rgba(232,213,163,.15);font-size:.75rem;color:var(--accent)">✦</span>
+        style="background:${currentWsId === 'all' ? 'rgba(232,213,163,.35)' : 'rgba(232,213,163,.25)'};border-left-color:#e8d5a3;color:${currentWsId === 'all' ? 'var(--accent)' : 'var(--text)'}">
+    <span class="ws-icon" style="background:rgba(232,213,163,.2);font-size:.75rem;color:var(--accent)">✦</span>
     <span style="flex:1">All Tasks</span>
     <span class="ws-count">${allCount}</span>
   </button>`;
@@ -1692,27 +1785,78 @@
       workspaces.forEach(ws => {
         const count = all.filter(t => !t.completed && t.workspace === ws.id).length;
         const hex = ws.color || '#e8d5a3';
-        html += `<button class="ws-card ${currentWsId === ws.id ? 'active' : ''}" onclick="selectWorkspace('${ws.id}')"
-          style="background:${hex}18;border-left-color:${hex};color:var(--text)">
-          <span class="ws-icon" style="background:${hex}30">${ws.icon}</span>
+        const isActive = currentWsId === ws.id;
+        html += `<button class="ws-card ${isActive ? 'active' : ''}" onclick="selectWorkspace('${ws.id}')"
+          style="background:${isActive ? hex + '59' : hex + '40'};border-left-color:${hex};color:${isActive ? hex : 'var(--text)'}">
+          <span class="ws-icon" style="background:${hex}40">${ws.icon}</span>
           <span style="flex:1">${esc(ws.name)}</span>
-          <span class="ws-count" style="background:${hex}20;color:${hex}">${count}</span>
+          <span class="ws-count" style="background:${hex}30;color:${hex}">${count}</span>
         </button>`;
       });
 
       container.innerHTML = html;
 
+      // Render pages section for active workspace in sidebar
+      if (currentWsId !== 'all') {
+        const activeWs = workspaces.find(w => w.id === currentWsId);
+        if (activeWs) {
+          const pages = activeWs.pages || [];
+          let pageHtml = `<div class="pages-section">`;
+          pages.forEach(pg => {
+            pageHtml += `<button class="page-item ${currentPageId === pg.id ? 'active' : ''}" onclick="selectPage('${pg.id}')">
+              <span class="page-dot"></span>${esc(pg.name)}
+              <button class="page-del" onclick="event.stopPropagation();deletePage('${activeWs.id}','${pg.id}')">✕</button>
+            </button>`;
+          });
+          pageHtml += `<button class="add-page-btn" onclick="addPage('${activeWs.id}')">＋ Add page</button></div>`;
+          container.innerHTML += pageHtml;
+        }
+      }
+
       // Update header
+      const ws = workspaces.find(w => w.id === currentWsId);
       if (currentWsId === 'all') {
         document.getElementById('ws-title').textContent = 'All Tasks';
         document.getElementById('ws-subtitle').textContent = 'Everything in one place';
         document.getElementById('edit-ws-btn').style.display = 'none';
+        // Hide banner
+        const banner = document.getElementById('ws-banner');
+        if (banner) banner.style.display = 'none';
+        document.getElementById('main-content').style.removeProperty('--ws-color');
       } else {
-        const ws = workspaces.find(w => w.id === currentWsId);
         if (ws) {
           document.getElementById('ws-title').textContent = ws.icon + '  ' + ws.name;
-          document.getElementById('ws-subtitle').textContent = getTaskList().filter(t => !t.completed && t.workspace === ws.id).length + ' active tasks';
+          const activeCount = getTaskList().filter(t => !t.completed && t.workspace === ws.id).length;
+          document.getElementById('ws-subtitle').textContent = activeCount + ' active tasks';
           document.getElementById('edit-ws-btn').style.display = 'block';
+          // Show banner
+          const banner = document.getElementById('ws-banner');
+          if (banner) {
+            banner.style.display = 'flex';
+            banner.style.background = `linear-gradient(135deg, ${ws.color}22 0%, transparent 100%)`;
+            banner.style.borderLeft = `4px solid ${ws.color}`;
+            const bannerIcon = document.getElementById('banner-icon');
+            const bannerTitle = document.getElementById('banner-title');
+            const bannerSub = document.getElementById('banner-sub');
+            if (bannerIcon) bannerIcon.textContent = ws.icon;
+            if (bannerTitle) bannerTitle.textContent = ws.name;
+            if (bannerSub) bannerSub.textContent = activeCount + ' active tasks';
+          }
+          document.getElementById('main-content').style.setProperty('--ws-color', ws.color);
+        }
+      }
+
+      // Render page tabs in main content
+      const pageTabs = document.getElementById('page-tabs');
+      if (pageTabs) {
+        if (currentWsId !== 'all' && ws) {
+          const pages = ws.pages || [];
+          pageTabs.style.display = pages.length ? 'flex' : 'none';
+          pageTabs.innerHTML = pages.map(pg =>
+            `<button class="pg-tab ${currentPageId === pg.id ? 'active' : ''}" onclick="selectPage('${pg.id}')">${esc(pg.name)}</button>`
+          ).join('');
+        } else {
+          pageTabs.style.display = 'none';
         }
       }
 
@@ -1721,18 +1865,48 @@
       if (sel) {
         const prev = sel.value;
         sel.innerHTML = '<option value="">— No workspace —</option>' +
-          workspaces.map(ws => `<option value="${ws.id}" ${prev === ws.id ? 'selected' : ''}>${ws.icon} ${esc(ws.name)}</option>`).join('');
+          workspaces.map(w => `<option value="${w.id}" ${prev === w.id ? 'selected' : ''}>${w.icon} ${esc(w.name)}</option>`).join('');
         if (currentWsId !== 'all') sel.value = currentWsId;
       }
     }
 
     window.selectWorkspace = function (id) {
       currentWsId = id;
+      currentPageId = null;
       currentFilter = 'all';
       // reset tab highlights
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab-all')?.classList.add('active');
       document.querySelectorAll('.ws-item').forEach(b => b.classList.remove('active'));
+      renderSidebar();
+      renderTasks();
+    };
+
+    window.selectPage = function (id) {
+      currentPageId = currentPageId === id ? null : id;
+      renderSidebar();
+      renderTasks();
+    };
+
+    window.addPage = function (wsId) {
+      const name = prompt('Page name:');
+      if (!name || !name.trim()) return;
+      const ws = workspaces.find(w => w.id === wsId);
+      if (!ws) return;
+      if (!ws.pages) ws.pages = [];
+      ws.pages.push({ id: 'pg-' + Date.now(), name: name.trim() });
+      saveWorkspacesLocal();
+      renderSidebar();
+      renderTasks();
+    };
+
+    window.deletePage = function (wsId, pageId) {
+      if (!confirm('Delete this page? Tasks in it will remain, just without a page.')) return;
+      const ws = workspaces.find(w => w.id === wsId);
+      if (!ws || !ws.pages) return;
+      ws.pages = ws.pages.filter(p => p.id !== pageId);
+      if (currentPageId === pageId) currentPageId = null;
+      saveWorkspacesLocal();
       renderSidebar();
       renderTasks();
     };
@@ -1773,7 +1947,8 @@
         const ws = workspaces.find(w => w.id === editingWsId);
         if (ws) { ws.name = name; ws.icon = selectedEmoji; ws.color = selectedColor; }
       } else {
-        workspaces.push({ id: 'ws-' + Date.now(), uid: currentUser.id, name, icon: selectedEmoji, color: selectedColor });
+        const newId = 'ws-' + Date.now();
+        workspaces.push({ id: newId, uid: currentUser.id, name, icon: selectedEmoji, color: selectedColor, pages: [{ id: newId + '-general', name: 'General' }] });
       }
       saveWorkspacesLocal();
       closeWsModal();
@@ -1846,6 +2021,7 @@
         subtasks: task.subtasks || [],
         subtask_mode: task.subtaskMode || 'checkbox',
         images: task.images || [],
+        page_id: task.page_id || null,
         updated_at: new Date().toISOString()
       };
       const { error } = await supabase_client.from('tasks').upsert(row);
@@ -1884,6 +2060,7 @@
         subtasks: r.subtasks || [],
         subtaskMode: r.subtask_mode || 'checkbox',
         images: r.images || [],
+        page_id: r.page_id || null,
         createdAt: r.created_at
       };
     }
@@ -1912,12 +2089,19 @@
       if (type === 'view') {
         // Clicked from sidebar view — clear workspace selection
         currentWsId = 'all';
+        currentPageId = null;
         document.querySelectorAll('.ws-item').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('tab-all')?.classList.add('active');
         document.getElementById('edit-ws-btn').style.display = 'none';
         document.getElementById('ws-title').textContent = { today: 'Today', overdue: 'Overdue', shared: 'Shared with Me', completed: 'Completed' }[f] || 'All Tasks';
         document.getElementById('ws-subtitle').textContent = '';
+        // Hide banner when viewing global views
+        const banner = document.getElementById('ws-banner');
+        if (banner) banner.style.display = 'none';
+        document.getElementById('main-content').style.removeProperty('--ws-color');
+        const pageTabs = document.getElementById('page-tabs');
+        if (pageTabs) pageTabs.style.display = 'none';
       } else {
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
@@ -1938,6 +2122,11 @@
       // Filter by workspace first
       if (currentWsId !== 'all') {
         list = list.filter(t => t.workspace === currentWsId || (currentWsId === 'ws-shared' && t.uid !== currentUser?.id));
+      }
+
+      // Filter by page if selected
+      if (currentPageId) {
+        list = list.filter(t => t.page_id === currentPageId);
       }
 
       if (currentFilter === 'today') list = list.filter(t => t.dueDate === todayStr);
@@ -2012,13 +2201,17 @@
       const val = inp.value.trim();
       inp.value = '';
       openModal(null);
-      if (val) {
-        // Pre-fill title after modal opens
-        setTimeout(() => {
+      setTimeout(() => {
+        if (val) {
           const titleEl = document.getElementById('m-title');
           if (titleEl) { titleEl.value = val; titleEl.focus(); }
-        }, 60);
-      }
+        }
+        // Pre-fill page if currentPageId is set
+        if (currentPageId) {
+          const pageSel = document.getElementById('m-page');
+          if (pageSel) pageSel.value = currentPageId;
+        }
+      }, 60);
     };
 
     // Keep quickAdd as alias for any other callers
@@ -2094,6 +2287,7 @@
       }
 
       renderReminderRows(); renderShareChips(); renderSubtasks(); renderPastedImages(); applySubtaskModeUI();
+
       // Populate workspace dropdown
       const wsSel = document.getElementById('m-workspace');
       wsSel.innerHTML = '<option value="">— No workspace —</option>' +
@@ -2104,6 +2298,29 @@
       } else {
         wsSel.value = currentWsId !== 'all' ? currentWsId : '';
       }
+
+      // Helper to populate page dropdown based on selected workspace
+      function populatePageDropdown(wsId) {
+        const pageSel = document.getElementById('m-page');
+        if (!pageSel) return;
+        const currentWs = workspaces.find(w => w.id === wsId);
+        pageSel.innerHTML = '<option value="">— No page —</option>' +
+          (currentWs?.pages || []).map(pg => `<option value="${pg.id}">${esc(pg.name)}</option>`).join('');
+        if (editingId) {
+          const t2 = getTaskList().find(x => x.id === editingId);
+          if (t2) pageSel.value = t2.page_id || '';
+        } else if (currentPageId) {
+          pageSel.value = currentPageId;
+        }
+      }
+
+      populatePageDropdown(wsSel.value);
+
+      // Update page dropdown when workspace changes
+      wsSel.onchange = function () {
+        populatePageDropdown(this.value);
+      };
+
       document.getElementById('modal').classList.add('open');
       setTimeout(() => document.getElementById('m-title').focus(), 50);
     };
@@ -2242,7 +2459,8 @@
         images: [...pastedImages],
         completed: existing?.completed || false,
         createdAt: existing?.createdAt || new Date().toISOString(),
-        workspace: document.getElementById('m-workspace')?.value || (currentWsId !== 'all' ? currentWsId : '')
+        workspace: document.getElementById('m-workspace')?.value || (currentWsId !== 'all' ? currentWsId : ''),
+        page_id: document.getElementById('m-page')?.value || null
       };
 
       const idx = tasks.findIndex(t => t.id === task.id);
