@@ -232,8 +232,40 @@
       position: sticky;
       top: 65px;
       height: calc(100vh - 65px);
-      overflow-y: auto
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width .28s cubic-bezier(.4,0,.2,1), padding .28s ease
     }
+
+    #sidebar.collapsed {
+      width: 0;
+      padding: 0
+    }
+
+    #sidebar-toggle {
+      position: fixed;
+      top: 50%;
+      left: 220px;
+      transform: translateY(-50%);
+      z-index: 100;
+      width: 20px;
+      height: 48px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text3);
+      font-size: .7rem;
+      transition: left .28s cubic-bezier(.4,0,.2,1);
+      user-select: none
+    }
+
+    #sidebar-toggle:hover { color: var(--accent); background: var(--surface) }
+    #sidebar-toggle.collapsed { left: 0 }
 
     .sidebar-section {
       padding: 0 .75rem;
@@ -304,6 +336,27 @@
       color: var(--accent);
       font-weight: 600
     }
+
+    /* Workspace colored cards */
+    .ws-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: .6rem .75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s;
+      font-size: .88rem;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 4px;
+      border-left: 3px solid transparent
+    }
+
+    .ws-card:hover { filter: brightness(1.1) }
+    .ws-card.active { filter: brightness(1.15); font-weight: 600 }
 
     .ws-icon {
       width: 28px;
@@ -875,6 +928,69 @@
       border-color: var(--accent2)
     }
 
+    /* Title field — always prominent */
+    #m-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      border-color: var(--accent2);
+      background: rgba(232,213,163,.06);
+      padding: .85rem 1rem
+    }
+
+    #m-title:focus {
+      background: rgba(232,213,163,.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(232,213,163,.12)
+    }
+
+    /* Notes area with image paste support indicator */
+    #m-notes { min-height: 90px }
+
+    /* Image paste preview inside notes */
+    .notes-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px
+    }
+
+    .notes-img-wrap {
+      position: relative;
+      display: inline-block
+    }
+
+    .notes-img-wrap img {
+      max-width: 120px;
+      max-height: 90px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      object-fit: cover
+    }
+
+    .notes-img-wrap .remove-img {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: .65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1
+    }
+
+    .img-paste-hint {
+      font-size: .72rem;
+      color: var(--text3);
+      margin-top: 4px
+    }
+
     .form-input::placeholder,
     .form-textarea::placeholder {
       color: var(--text3)
@@ -1137,6 +1253,9 @@
     <!-- WORKSPACE SIDEBAR + MAIN LAYOUT -->
     <div id="app-layout">
 
+      <!-- Sidebar slide toggle -->
+      <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">◀</button>
+
       <!-- Sidebar -->
       <div id="sidebar">
         <div class="sidebar-section">
@@ -1287,7 +1406,9 @@
         </div>
         <div class="form-group">
           <label>Notes</label>
-          <textarea class="form-textarea" id="m-notes" placeholder="Details, links, context…"></textarea>
+          <textarea class="form-textarea" id="m-notes" placeholder="Details, links, context… (paste images here)"></textarea>
+          <div class="img-paste-hint">📎 Paste an image (Ctrl+V / Cmd+V) to attach it</div>
+          <div class="notes-images" id="notes-images"></div>
         </div>
         <div style="display:flex;gap:10px">
           <div class="form-group" style="flex:1">
@@ -1317,7 +1438,13 @@
 
         <!-- Subtasks -->
         <div class="form-group">
-          <label>☑ Subtasks</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+            <label style="margin:0">Subtasks <span style="font-size:.7rem;color:var(--text3);font-weight:400">(optional)</span></label>
+            <div style="display:flex;gap:4px">
+              <button id="st-mode-check" class="btn-ghost" style="padding:.2rem .6rem;font-size:.75rem;opacity:1" onclick="setSubtaskMode('checkbox')" title="Checkbox mode">☑</button>
+              <button id="st-mode-bullet" class="btn-ghost" style="padding:.2rem .6rem;font-size:.75rem;opacity:.4" onclick="setSubtaskMode('bullet')" title="Bullet mode">•</button>
+            </div>
+          </div>
           <div class="subtask-list" id="subtask-list"></div>
           <div class="subtask-add-row">
             <input class="subtask-input" id="subtask-input" placeholder="Add a subtask… press Enter"
@@ -1380,6 +1507,8 @@
     let reminders = [];
     let shareList = [];
     let subtasks = [];
+    let subtaskMode = 'checkbox'; // 'checkbox' | 'bullet'
+    let pastedImages = []; // array of base64 data URLs
     let currentFilter = 'all';
     let realtimeSub = null;
 
@@ -1436,6 +1565,64 @@
       el.classList.toggle('collapsed');
       label.classList.toggle('collapsed');
     };
+
+    // ── SIDEBAR SLIDE TOGGLE ──
+    let sidebarOpen = true;
+    window.toggleSidebar = function () {
+      sidebarOpen = !sidebarOpen;
+      const sb = document.getElementById('sidebar');
+      const btn = document.getElementById('sidebar-toggle');
+      sb.classList.toggle('collapsed', !sidebarOpen);
+      btn.classList.toggle('collapsed', !sidebarOpen);
+      btn.textContent = sidebarOpen ? '◀' : '▶';
+    };
+
+    // ── IMAGE PASTE INTO NOTES ──
+    function renderPastedImages() {
+      const container = document.getElementById('notes-images');
+      if (!container) return;
+      container.innerHTML = pastedImages.map((src, i) => `
+        <div class="notes-img-wrap">
+          <img src="${src}" alt="pasted image">
+          <button class="remove-img" onclick="removePastedImage(${i})">✕</button>
+        </div>`).join('');
+    }
+
+    window.removePastedImage = function (i) {
+      pastedImages.splice(i, 1);
+      renderPastedImages();
+    };
+
+    // Listen for paste on the notes textarea
+    document.addEventListener('paste', function (e) {
+      if (!document.getElementById('modal').classList.contains('open')) return;
+      const active = document.activeElement;
+      if (!active || active.id !== 'm-notes') return;
+      const items = e.clipboardData?.items || [];
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const reader = new FileReader();
+          reader.onload = ev => { pastedImages.push(ev.target.result); renderPastedImages(); };
+          reader.readAsDataURL(item.getAsFile());
+        }
+      }
+    });
+
+    // ── SUBTASK MODE ──
+    window.setSubtaskMode = function (mode) {
+      subtaskMode = mode;
+      applySubtaskModeUI();
+      renderSubtasks();
+    };
+
+    function applySubtaskModeUI() {
+      const cb = document.getElementById('st-mode-check');
+      const bl = document.getElementById('st-mode-bullet');
+      if (!cb || !bl) return;
+      cb.style.opacity = subtaskMode === 'checkbox' ? '1' : '.4';
+      bl.style.opacity = subtaskMode === 'bullet' ? '1' : '.4';
+    }
 
     window.signInWithGoogle = async function () {
       if (DEMO_MODE) { enterDemoMode(); return; }
@@ -1498,19 +1685,22 @@
       const container = document.getElementById('ws-list');
       const allCount = all.filter(t => !t.completed).length;
 
-      let html = `<button class="ws-item ${currentWsId === 'all' ? 'active' : ''}" onclick="selectWorkspace('all')">
-    <span class="ws-icon" style="background:rgba(232,213,163,.1);font-size:.75rem;color:var(--accent)">✦</span>
-    All Tasks
+      let html = `<button class="ws-card ${currentWsId === 'all' ? 'active' : ''}" onclick="selectWorkspace('all')"
+        style="background:rgba(232,213,163,.08);border-left-color:#e8d5a3;color:var(--text)">
+    <span class="ws-icon" style="background:rgba(232,213,163,.15);font-size:.75rem;color:var(--accent)">✦</span>
+    <span style="flex:1">All Tasks</span>
     <span class="ws-count">${allCount}</span>
   </button>`;
 
       workspaces.forEach(ws => {
         const count = all.filter(t => !t.completed && t.workspace === ws.id).length;
-        html += `<button class="ws-item ${currentWsId === ws.id ? 'active' : ''}" onclick="selectWorkspace('${ws.id}')">
-      <span class="ws-icon" style="background:${ws.color}22">${ws.icon}</span>
-      ${esc(ws.name)}
-      <span class="ws-count">${count}</span>
-    </button>`;
+        const hex = ws.color || '#e8d5a3';
+        html += `<button class="ws-card ${currentWsId === ws.id ? 'active' : ''}" onclick="selectWorkspace('${ws.id}')"
+          style="background:${hex}18;border-left-color:${hex};color:var(--text)">
+          <span class="ws-icon" style="background:${hex}30">${ws.icon}</span>
+          <span style="flex:1">${esc(ws.name)}</span>
+          <span class="ws-count" style="background:${hex}20;color:${hex}">${count}</span>
+        </button>`;
       });
 
       container.innerHTML = html;
@@ -1657,6 +1847,8 @@
         workspace: task.workspace || null,
         completed: task.completed || false,
         subtasks: task.subtasks || [],
+        subtask_mode: task.subtaskMode || 'checkbox',
+        images: task.images || [],
         updated_at: new Date().toISOString()
       };
       const { error } = await supabase_client.from('tasks').upsert(row);
@@ -1693,6 +1885,8 @@
         workspace: r.workspace || '',
         completed: r.completed || false,
         subtasks: r.subtasks || [],
+        subtaskMode: r.subtask_mode || 'checkbox',
+        images: r.images || [],
         createdAt: r.created_at
       };
     }
@@ -1793,6 +1987,7 @@
       <div class="task-title">${esc(t.title)}</div>
       <div class="task-meta">${pri}${date}${rem}${sharedBadge}${collabBadge}${tags}</div>
       ${t.notes ? `<div style="font-size:.8rem;color:var(--text3);margin-top:5px">${esc(t.notes)}</div>` : ''}
+      ${(t.images || []).length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${t.images.map(src => `<img src="${src}" style="max-width:72px;max-height:54px;border-radius:6px;border:1px solid var(--border);object-fit:cover">`).join('')}</div>` : ''}
       ${(t.subtasks || []).length ? (() => {
         const total = t.subtasks.length;
         const done = t.subtasks.filter(s => s.done).length;
@@ -1867,11 +2062,12 @@
     // ─────────────────────────────────────────────
     window.openModal = function (id) {
       editingId = id || null;
-      reminders = []; shareList = []; subtasks = [];
+      reminders = []; shareList = []; subtasks = []; pastedImages = [];
       document.getElementById('reminder-list').innerHTML = '';
       document.getElementById('share-list').innerHTML = '';
       document.getElementById('share-email-input').value = '';
       document.getElementById('subtask-input').value = '';
+      document.getElementById('notes-images').innerHTML = '';
       document.getElementById('delete-btn').style.display = id ? 'block' : 'none';
       document.getElementById('modal-title').textContent = id ? 'Edit Task' : 'New Task';
 
@@ -1887,13 +2083,15 @@
         reminders = JSON.parse(JSON.stringify(t.reminders || []));
         shareList = [...(t.sharedWith || [])];
         subtasks = JSON.parse(JSON.stringify(t.subtasks || []));
+        subtaskMode = t.subtaskMode || 'checkbox';
+        pastedImages = [...(t.images || [])];
       } else {
         ['m-title', 'm-notes', 'm-due', 'm-tags'].forEach(i => document.getElementById(i).value = '');
         document.getElementById('m-priority').value = 'medium';
         document.getElementById('m-workspace').value = currentWsId !== 'all' ? currentWsId : '';
       }
 
-      renderReminderRows(); renderShareChips(); renderSubtasks();
+      renderReminderRows(); renderShareChips(); renderSubtasks(); renderPastedImages(); applySubtaskModeUI();
       // Populate workspace dropdown
       const wsSel = document.getElementById('m-workspace');
       wsSel.innerHTML = '<option value="">— No workspace —</option>' +
@@ -1908,10 +2106,20 @@
       setTimeout(() => document.getElementById('m-title').focus(), 50);
     };
 
-    window.closeModal = function () {
+    window.closeModal = function (force) {
+      const title = document.getElementById('m-title').value.trim();
+      if (!force && title && !editingId) {
+        // New task has a title but user is closing — ask to discard
+        if (!confirm('Discard this task? Changes won\'t be saved.')) return;
+      }
       document.getElementById('modal').classList.remove('open');
       editingId = null;
     };
+
+    // Prevent closing modal by clicking backdrop unless confirmed
+    document.getElementById('modal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
 
     // ─────────────────────────────────────────────
     // REMINDERS
@@ -1966,12 +2174,20 @@
     // SUBTASKS
     // ─────────────────────────────────────────────
     function renderSubtasks() {
-      document.getElementById('subtask-list').innerHTML = subtasks.map((s, i) => `
-        <div class="subtask-row">
+      document.getElementById('subtask-list').innerHTML = subtasks.map((s, i) => {
+        if (subtaskMode === 'bullet') {
+          return `<div class="subtask-row">
+            <span style="color:var(--accent2);font-size:1rem;line-height:1">•</span>
+            <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
+            <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
+          </div>`;
+        }
+        return `<div class="subtask-row">
           <button class="subtask-check ${s.done ? 'done' : ''}" onclick="toggleSubtask(${i})"></button>
           <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
           <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
 
     window.addSubtask = function () {
@@ -2020,6 +2236,8 @@
         reminders: JSON.parse(JSON.stringify(reminders)),
         sharedWith: [...shareList],
         subtasks: JSON.parse(JSON.stringify(subtasks)),
+        subtaskMode,
+        images: [...pastedImages],
         completed: existing?.completed || false,
         createdAt: existing?.createdAt || new Date().toISOString(),
         workspace: document.getElementById('m-workspace')?.value || (currentWsId !== 'all' ? currentWsId : '')
