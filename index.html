@@ -247,7 +247,34 @@
       letter-spacing: .1em;
       color: var(--text3);
       padding: 0 .5rem;
-      margin-bottom: .5rem
+      margin-bottom: .5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none
+    }
+
+    .sidebar-label .collapse-arrow {
+      font-size: .7rem;
+      transition: transform .2s;
+      color: var(--text3)
+    }
+
+    .sidebar-label.collapsed .collapse-arrow {
+      transform: rotate(-90deg)
+    }
+
+    .sidebar-collapsible {
+      overflow: hidden;
+      transition: max-height .25s ease, opacity .2s ease;
+      max-height: 600px;
+      opacity: 1
+    }
+
+    .sidebar-collapsible.collapsed {
+      max-height: 0;
+      opacity: 0
     }
 
     .ws-item {
@@ -693,6 +720,70 @@
     }
 
     /* MODAL */
+    /* SUBTASKS */
+    .subtask-list { margin-top: 6px }
+    .subtask-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border)
+    }
+    .subtask-row:last-child { border-bottom: none }
+    .subtask-check {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text3);
+      background: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all .15s
+    }
+    .subtask-check.done {
+      background: var(--success);
+      border-color: var(--success)
+    }
+    .subtask-text {
+      flex: 1;
+      font-size: .82rem;
+      color: var(--text2)
+    }
+    .subtask-text.done { text-decoration: line-through; color: var(--text3) }
+    .subtask-add-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px
+    }
+    .subtask-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .84rem;
+      padding: .4rem .7rem
+    }
+    .subtask-input:focus { outline: none; border-color: var(--accent) }
+    .subtask-progress {
+      font-size: .72rem;
+      color: var(--text3);
+      margin-top: 4px
+    }
+    .subtask-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 3px;
+      overflow: hidden
+    }
+    .subtask-bar-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 2px;
+      transition: width .3s
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -1049,30 +1140,38 @@
       <!-- Sidebar -->
       <div id="sidebar">
         <div class="sidebar-section">
-          <div class="sidebar-label">Workspaces</div>
-          <div id="ws-list"></div>
+          <div class="sidebar-label" onclick="toggleSidebarSection('ws-collapsible', this)">
+            Workspaces <span class="collapse-arrow">▾</span>
+          </div>
+          <div class="sidebar-collapsible" id="ws-collapsible">
+            <div id="ws-list"></div>
+          </div>
         </div>
         <button class="add-ws-btn" onclick="openWsModal()">＋ New workspace</button>
 
         <div class="sidebar-section"
           style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);margin-top:1rem">
-          <div class="sidebar-label">Views</div>
-          <button class="ws-item" onclick="setFilter('today',this,'view')" id="view-today">
-            <span class="ws-icon" style="background:rgba(232,213,163,.1)">📅</span> Today
-            <span class="ws-count" id="count-today">0</span>
-          </button>
-          <button class="ws-item" onclick="setFilter('overdue',this,'view')" id="view-overdue">
-            <span class="ws-icon" style="background:rgba(224,112,112,.1)">⚠️</span> Overdue
-            <span class="ws-count" id="count-overdue">0</span>
-          </button>
-          <button class="ws-item" onclick="setFilter('shared',this,'view')" id="view-shared">
-            <span class="ws-icon" style="background:rgba(122,184,232,.1)">👥</span> Shared
-            <span class="ws-count" id="count-shared">0</span>
-          </button>
-          <button class="ws-item" onclick="setFilter('completed',this,'view')" id="view-completed">
-            <span class="ws-icon" style="background:rgba(126,200,160,.1)">✓</span> Completed
-            <span class="ws-count" id="count-completed">0</span>
-          </button>
+          <div class="sidebar-label" onclick="toggleSidebarSection('views-collapsible', this)">
+            Views <span class="collapse-arrow">▾</span>
+          </div>
+          <div class="sidebar-collapsible" id="views-collapsible">
+            <button class="ws-item" onclick="setFilter('today',this,'view')" id="view-today">
+              <span class="ws-icon" style="background:rgba(232,213,163,.1)">📅</span> Today
+              <span class="ws-count" id="count-today">0</span>
+            </button>
+            <button class="ws-item" onclick="setFilter('overdue',this,'view')" id="view-overdue">
+              <span class="ws-icon" style="background:rgba(224,112,112,.1)">⚠️</span> Overdue
+              <span class="ws-count" id="count-overdue">0</span>
+            </button>
+            <button class="ws-item" onclick="setFilter('shared',this,'view')" id="view-shared">
+              <span class="ws-icon" style="background:rgba(122,184,232,.1)">👥</span> Shared
+              <span class="ws-count" id="count-shared">0</span>
+            </button>
+            <button class="ws-item" onclick="setFilter('completed',this,'view')" id="view-completed">
+              <span class="ws-icon" style="background:rgba(126,200,160,.1)">✓</span> Completed
+              <span class="ws-count" id="count-completed">0</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1216,6 +1315,17 @@
           </select>
         </div>
 
+        <!-- Subtasks -->
+        <div class="form-group">
+          <label>☑ Subtasks</label>
+          <div class="subtask-list" id="subtask-list"></div>
+          <div class="subtask-add-row">
+            <input class="subtask-input" id="subtask-input" placeholder="Add a subtask… press Enter"
+              onkeydown="if(event.key==='Enter'){addSubtask();event.preventDefault()}">
+            <button class="btn-ghost" onclick="addSubtask()">Add</button>
+          </div>
+        </div>
+
         <!-- Reminders -->
         <div class="form-group">
           <label>🔔 Reminders</label>
@@ -1269,6 +1379,7 @@
     let editingId = null;
     let reminders = [];
     let shareList = [];
+    let subtasks = [];
     let currentFilter = 'all';
     let realtimeSub = null;
 
@@ -1319,6 +1430,12 @@
         else showAuth();
       }
     }
+
+    window.toggleSidebarSection = function (id, label) {
+      const el = document.getElementById(id);
+      el.classList.toggle('collapsed');
+      label.classList.toggle('collapsed');
+    };
 
     window.signInWithGoogle = async function () {
       if (DEMO_MODE) { enterDemoMode(); return; }
@@ -1539,6 +1656,7 @@
         shared_with: task.sharedWith || [],
         workspace: task.workspace || null,
         completed: task.completed || false,
+        subtasks: task.subtasks || [],
         updated_at: new Date().toISOString()
       };
       const { error } = await supabase_client.from('tasks').upsert(row);
@@ -1574,6 +1692,7 @@
         sharedWith: r.shared_with || [],
         workspace: r.workspace || '',
         completed: r.completed || false,
+        subtasks: r.subtasks || [],
         createdAt: r.created_at
       };
     }
@@ -1674,6 +1793,18 @@
       <div class="task-title">${esc(t.title)}</div>
       <div class="task-meta">${pri}${date}${rem}${sharedBadge}${collabBadge}${tags}</div>
       ${t.notes ? `<div style="font-size:.8rem;color:var(--text3);margin-top:5px">${esc(t.notes)}</div>` : ''}
+      ${(t.subtasks || []).length ? (() => {
+        const total = t.subtasks.length;
+        const done = t.subtasks.filter(s => s.done).length;
+        const pct = Math.round(done / total * 100);
+        return `<div class="subtask-progress">${done}/${total} subtasks</div>
+          <div class="subtask-bar"><div class="subtask-bar-fill" style="width:${pct}%"></div></div>
+          <div class="subtask-list" style="margin-top:6px">${t.subtasks.map((s, i) => `
+            <div class="subtask-row">
+              <button class="subtask-check ${s.done ? 'done' : ''}" onclick="toggleSubtaskInline('${t.id}',${i})"></button>
+              <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
+            </div>`).join('')}</div>`;
+      })() : ''}
     </div>
     <div class="task-actions">
       <button class="icon-btn" onclick="openModal('${t.id}')" title="Edit">✎</button>
@@ -1737,10 +1868,11 @@
     // ─────────────────────────────────────────────
     window.openModal = function (id) {
       editingId = id || null;
-      reminders = []; shareList = [];
+      reminders = []; shareList = []; subtasks = [];
       document.getElementById('reminder-list').innerHTML = '';
       document.getElementById('share-list').innerHTML = '';
       document.getElementById('share-email-input').value = '';
+      document.getElementById('subtask-input').value = '';
       document.getElementById('delete-btn').style.display = id ? 'block' : 'none';
       document.getElementById('modal-title').textContent = id ? 'Edit Task' : 'New Task';
 
@@ -1755,13 +1887,14 @@
         document.getElementById('m-workspace').value = t.workspace || '';
         reminders = JSON.parse(JSON.stringify(t.reminders || []));
         shareList = [...(t.sharedWith || [])];
+        subtasks = JSON.parse(JSON.stringify(t.subtasks || []));
       } else {
         ['m-title', 'm-notes', 'm-due', 'm-tags'].forEach(i => document.getElementById(i).value = '');
         document.getElementById('m-priority').value = 'medium';
         document.getElementById('m-workspace').value = currentWsId !== 'all' ? currentWsId : '';
       }
 
-      renderReminderRows(); renderShareChips();
+      renderReminderRows(); renderShareChips(); renderSubtasks();
       // Populate workspace dropdown
       const wsSel = document.getElementById('m-workspace');
       wsSel.innerHTML = '<option value="">— No workspace —</option>' +
@@ -1831,6 +1964,45 @@
     window.removeShare = i => { shareList.splice(i, 1); renderShareChips(); };
 
     // ─────────────────────────────────────────────
+    // SUBTASKS
+    // ─────────────────────────────────────────────
+    function renderSubtasks() {
+      document.getElementById('subtask-list').innerHTML = subtasks.map((s, i) => `
+        <div class="subtask-row">
+          <button class="subtask-check ${s.done ? 'done' : ''}" onclick="toggleSubtask(${i})"></button>
+          <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
+          <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
+        </div>`).join('');
+    }
+
+    window.addSubtask = function () {
+      const inp = document.getElementById('subtask-input');
+      const title = inp.value.trim();
+      if (!title) return;
+      subtasks.push({ id: crypto.randomUUID(), title, done: false });
+      inp.value = '';
+      renderSubtasks();
+    };
+
+    window.toggleSubtask = function (i) {
+      subtasks[i].done = !subtasks[i].done;
+      renderSubtasks();
+    };
+
+    window.removeSubtask = function (i) {
+      subtasks.splice(i, 1);
+      renderSubtasks();
+    };
+
+    window.toggleSubtaskInline = function (taskId, i) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t || !t.subtasks) return;
+      t.subtasks[i].done = !t.subtasks[i].done;
+      persistTask(t);
+      renderTasks();
+    };
+
+    // ─────────────────────────────────────────────
     // SAVE
     // ─────────────────────────────────────────────
     window.saveTask = function () {
@@ -1848,6 +2020,7 @@
         tags,
         reminders: JSON.parse(JSON.stringify(reminders)),
         sharedWith: [...shareList],
+        subtasks: JSON.parse(JSON.stringify(subtasks)),
         completed: existing?.completed || false,
         createdAt: existing?.createdAt || new Date().toISOString(),
         workspace: document.getElementById('m-workspace')?.value || (currentWsId !== 'all' ? currentWsId : '')
