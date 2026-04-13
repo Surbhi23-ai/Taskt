@@ -1553,9 +1553,9 @@
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
             <label style="margin:0">Subtasks <span style="font-size:.7rem;color:var(--text3);font-weight:400">(optional)</span></label>
             <div style="display:flex;gap:4px">
-              <button id="st-mode-check" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:1" onclick="setSubtaskMode('checkbox')">☑ Checkbox</button>
-              <button id="st-mode-bullet" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:.4" onclick="setSubtaskMode('bullet')">• Bullet</button>
-              <button id="st-mode-number" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:.4" onclick="setSubtaskMode('number')">1. Number</button>
+              <button id="st-mode-check" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:1;outline:none" onclick="setSubtaskMode('checkbox')">☑ Checkbox</button>
+              <button id="st-mode-bullet" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:.4;outline:none" onclick="setSubtaskMode('bullet')">• Bullet</button>
+              <button id="st-mode-number" class="btn-ghost" style="padding:.2rem .55rem;font-size:.72rem;opacity:.4;outline:none" onclick="setSubtaskMode('number')">1. Number</button>
             </div>
           </div>
           <div class="subtask-list" id="subtask-list"></div>
@@ -2488,17 +2488,21 @@
     // SUBTASKS
     // ─────────────────────────────────────────────
     function renderSubtasks() {
+      // number mode: count only items that are also 'number' mode for sequential index
+      let numIdx = 0;
       document.getElementById('subtask-list').innerHTML = subtasks.map((s, i) => {
-        if (subtaskMode === 'bullet') {
+        const mode = s.mode || 'checkbox';
+        if (mode === 'bullet') {
           return `<div class="subtask-row">
             <span style="color:var(--accent2);font-size:1rem;line-height:1;flex-shrink:0">•</span>
             <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
             <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
           </div>`;
         }
-        if (subtaskMode === 'number') {
+        if (mode === 'number') {
+          numIdx++;
           return `<div class="subtask-row">
-            <span style="color:var(--text3);font-size:.8rem;min-width:18px;text-align:right;flex-shrink:0">${i + 1}.</span>
+            <span style="color:var(--text3);font-size:.8rem;min-width:18px;text-align:right;flex-shrink:0">${numIdx}.</span>
             <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.title)}</span>
             <button class="icon-btn delete" onclick="removeSubtask(${i})" style="opacity:.6;font-size:.8rem">✕</button>
           </div>`;
@@ -2515,7 +2519,7 @@
       const inp = document.getElementById('subtask-input');
       const title = inp.value.trim();
       if (!title) return;
-      subtasks.push({ id: crypto.randomUUID(), title, done: false });
+      subtasks.push({ id: crypto.randomUUID(), title, done: false, mode: subtaskMode });
       inp.value = '';
       renderSubtasks();
     };
