@@ -1316,12 +1316,9 @@
           </div>
 
           <div class="add-bar">
-            <input class="add-input" id="quick-input" placeholder="Add a task… press Enter"
-              onkeydown="if(event.key==='Enter')quickAdd()">
-            <button class="btn-primary" onclick="quickAdd()">+ Add</button>
-            <button class="btn-primary"
-              style="background:var(--surface2);color:var(--text2);border:1px solid var(--border)"
-              onclick="openModal(null)">⚙ Detail</button>
+            <input class="add-input" id="quick-input" placeholder="Type a task name and press Enter or + Add…"
+              onkeydown="if(event.key==='Enter')quickAddOpenModal()">
+            <button class="btn-primary" onclick="quickAddOpenModal()">+ Add</button>
           </div>
 
           <div class="filter-bar">
@@ -2010,17 +2007,22 @@
     // ─────────────────────────────────────────────
     // QUICK ADD
     // ─────────────────────────────────────────────
-    window.quickAdd = function () {
+    window.quickAddOpenModal = function () {
       const inp = document.getElementById('quick-input');
       const val = inp.value.trim();
-      if (!val) return;
-      const task = { id: crypto.randomUUID(), uid: currentUser.id, title: val, notes: '', dueDate: '', priority: 'medium', tags: [], reminders: [], sharedWith: [], completed: false, workspace: currentWsId !== 'all' ? currentWsId : '', createdAt: new Date().toISOString() };
-      tasks.unshift(task);
-      persistTask(task);
-      renderTasks();
       inp.value = '';
-      showToast('Task added ✓');
+      openModal(null);
+      if (val) {
+        // Pre-fill title after modal opens
+        setTimeout(() => {
+          const titleEl = document.getElementById('m-title');
+          if (titleEl) { titleEl.value = val; titleEl.focus(); }
+        }, 60);
+      }
     };
+
+    // Keep quickAdd as alias for any other callers
+    window.quickAdd = window.quickAddOpenModal;
 
     // ─────────────────────────────────────────────
     // TOGGLE COMPLETE
