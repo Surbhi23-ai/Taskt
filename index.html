@@ -795,7 +795,7 @@
     .subtask-row:last-child { border-bottom: none }
     .subtask-check {
       width: 16px; height: 16px;
-      border-radius: 50%;
+      border-radius: 3px;
       border: 1.5px solid var(--text3);
       background: none;
       cursor: pointer;
@@ -805,6 +805,13 @@
     .subtask-check.done {
       background: var(--success);
       border-color: var(--success)
+    }
+    .subtask-check.done::after {
+      content: '✓';
+      color: #111;
+      font-size: .65rem;
+      font-weight: 700;
+      line-height: 1
     }
     .subtask-text {
       flex: 1;
