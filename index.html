@@ -290,25 +290,7 @@
     }
 
     .sidebar-label .collapse-arrow {
-      font-size: .7rem;
-      transition: transform .2s;
-      color: var(--text3)
-    }
-
-    .sidebar-label.collapsed .collapse-arrow {
-      transform: rotate(-90deg)
-    }
-
-    .sidebar-collapsible {
-      overflow: hidden;
-      transition: max-height .25s ease, opacity .2s ease;
-      max-height: 600px;
-      opacity: 1
-    }
-
-    .sidebar-collapsible.collapsed {
-      max-height: 0;
-      opacity: 0
+      display: none
     }
 
     .ws-item {
@@ -1233,34 +1215,6 @@
       }
     }
 
-    /* PAGES IN SIDEBAR */
-    .pages-section { padding: 0 .75rem; margin-top: 4px; margin-bottom: .5rem }
-    .page-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: .4rem .6rem .4rem 1.5rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: .82rem; color: var(--text3);
-      border: none; background: none; width: 100%;
-      text-align: left; font-family: 'DM Sans', sans-serif;
-      transition: all .15s; position: relative
-    }
-    .page-item:hover { background: var(--surface2); color: var(--text2) }
-    .page-item.active { background: rgba(255,255,255,.06); color: var(--text); font-weight: 500 }
-    .page-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: .5 }
-    .page-item .page-del {
-      margin-left: auto; background: none; border: none; color: var(--text3);
-      cursor: pointer; font-size: .7rem; opacity: 0; padding: 2px 4px; border-radius: 4px
-    }
-    .page-item:hover .page-del { opacity: 1 }
-    .add-page-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: .35rem .6rem .35rem 1.5rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: .78rem; color: var(--text3);
-      border: none; background: none; width: 100%;
-      font-family: 'DM Sans', sans-serif; transition: all .15s
-    }
-    .add-page-btn:hover { color: var(--accent); background: rgba(232,213,163,.06) }
 
     /* WORKSPACE BANNER */
     #ws-banner {
@@ -1276,10 +1230,6 @@
     #ws-banner .banner-sub { font-size: .8rem; color: var(--text2); margin-top: 2px }
 
     /* PAGE TABS */
-    #page-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      margin-bottom: 1.25rem
-    }
     #page-tabs .pg-tab {
       padding: .35rem 1rem;
       border-radius: 20px;
@@ -1296,6 +1246,8 @@
       color: #111; font-weight: 600
     }
     #page-tabs .pg-tab:hover:not(.active) { border-color: var(--ws-color, var(--accent)); color: var(--text) }
+    #page-tabs .pg-tab .pg-del { display: inline; cursor: pointer; opacity: .5; font-size: .72rem; margin-left: 5px }
+    #page-tabs .pg-tab .pg-del:hover { opacity: 1 }
   </style>
 </head>
 
@@ -1351,38 +1303,34 @@
       <!-- Sidebar -->
       <div id="sidebar">
         <div class="sidebar-section">
-          <div class="sidebar-label" onclick="toggleSidebarSection('ws-collapsible', this)">
-            Workspaces <span class="collapse-arrow">▾</span>
+          <div class="sidebar-label" style="cursor:default">
+            Workspaces
           </div>
-          <div class="sidebar-collapsible" id="ws-collapsible">
-            <div id="ws-list"></div>
-          </div>
+          <div id="ws-list"></div>
         </div>
         <button class="add-ws-btn" onclick="openWsModal()">＋ New workspace</button>
 
         <div class="sidebar-section"
           style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);margin-top:1rem">
-          <div class="sidebar-label" onclick="toggleSidebarSection('views-collapsible', this)">
-            Views <span class="collapse-arrow">▾</span>
+          <div class="sidebar-label" style="cursor:default">
+            Views
           </div>
-          <div class="sidebar-collapsible" id="views-collapsible">
-            <button class="ws-item" onclick="setFilter('today',this,'view')" id="view-today">
-              <span class="ws-icon" style="background:rgba(232,213,163,.1)">📅</span> Today
-              <span class="ws-count" id="count-today">0</span>
-            </button>
-            <button class="ws-item" onclick="setFilter('overdue',this,'view')" id="view-overdue">
-              <span class="ws-icon" style="background:rgba(224,112,112,.1)">⚠️</span> Overdue
-              <span class="ws-count" id="count-overdue">0</span>
-            </button>
-            <button class="ws-item" onclick="setFilter('shared',this,'view')" id="view-shared">
-              <span class="ws-icon" style="background:rgba(122,184,232,.1)">👥</span> Shared
-              <span class="ws-count" id="count-shared">0</span>
-            </button>
-            <button class="ws-item" onclick="setFilter('completed',this,'view')" id="view-completed">
-              <span class="ws-icon" style="background:rgba(126,200,160,.1)">✓</span> Completed
-              <span class="ws-count" id="count-completed">0</span>
-            </button>
-          </div>
+          <button class="ws-item" onclick="setFilter('today',this,'view')" id="view-today">
+            <span class="ws-icon" style="background:rgba(232,213,163,.1)">📅</span> Today
+            <span class="ws-count" id="count-today">0</span>
+          </button>
+          <button class="ws-item" onclick="setFilter('overdue',this,'view')" id="view-overdue">
+            <span class="ws-icon" style="background:rgba(224,112,112,.1)">⚠️</span> Overdue
+            <span class="ws-count" id="count-overdue">0</span>
+          </button>
+          <button class="ws-item" onclick="setFilter('shared',this,'view')" id="view-shared">
+            <span class="ws-icon" style="background:rgba(122,184,232,.1)">👥</span> Shared
+            <span class="ws-count" id="count-shared">0</span>
+          </button>
+          <button class="ws-item" onclick="setFilter('completed',this,'view')" id="view-completed">
+            <span class="ws-icon" style="background:rgba(126,200,160,.1)">✓</span> Completed
+            <span class="ws-count" id="count-completed">0</span>
+          </button>
         </div>
       </div>
 
@@ -1420,7 +1368,10 @@
           </div>
 
           <!-- Page tabs (horizontal strip) -->
-          <div id="page-tabs" style="display:none"></div>
+          <div id="page-tabs-wrap" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem">
+            <div id="page-tabs" style="display:flex;gap:6px;flex-wrap:wrap;flex:1"></div>
+            <button id="add-page-btn-main" class="btn-ghost" style="font-size:.8rem;padding:.35rem .75rem;white-space:nowrap" onclick="addPageFromMain()">＋ Page</button>
+          </div>
 
           <div class="add-bar">
             <input class="add-input" id="quick-input" placeholder="Type a task name and press Enter or + Add…"
@@ -1820,23 +1771,6 @@
 
       container.innerHTML = html;
 
-      // Render pages section for active workspace in sidebar
-      if (currentWsId !== 'all') {
-        const activeWs = workspaces.find(w => w.id === currentWsId);
-        if (activeWs) {
-          const pages = activeWs.pages || [];
-          let pageHtml = `<div class="pages-section">`;
-          pages.forEach(pg => {
-            pageHtml += `<button class="page-item ${currentPageId === pg.id ? 'active' : ''}" onclick="selectPage('${pg.id}')">
-              <span class="page-dot"></span>${esc(pg.name)}
-              <button class="page-del" onclick="event.stopPropagation();deletePage('${activeWs.id}','${pg.id}')">✕</button>
-            </button>`;
-          });
-          pageHtml += `<button class="add-page-btn" onclick="addPage('${activeWs.id}')">＋ Add page</button></div>`;
-          container.innerHTML += pageHtml;
-        }
-      }
-
       // Update header
       const ws = workspaces.find(w => w.id === currentWsId);
       if (currentWsId === 'all') {
@@ -1871,16 +1805,18 @@
       }
 
       // Render page tabs in main content
+      const pageTabsWrap = document.getElementById('page-tabs-wrap');
       const pageTabs = document.getElementById('page-tabs');
-      if (pageTabs) {
+      if (pageTabs && pageTabsWrap) {
         if (currentWsId !== 'all' && ws) {
           const pages = ws.pages || [];
-          pageTabs.style.display = pages.length ? 'flex' : 'none';
+          pageTabsWrap.style.display = 'flex';
           pageTabs.innerHTML = pages.map(pg =>
-            `<button class="pg-tab ${currentPageId === pg.id ? 'active' : ''}" onclick="selectPage('${pg.id}')">${esc(pg.name)}</button>`
+            `<button class="pg-tab ${currentPageId === pg.id ? 'active' : ''}" onclick="selectPage('${pg.id}')">${esc(pg.name)}` +
+            `<span onclick="event.stopPropagation();deletePage('${ws.id}','${pg.id}')" style="margin-left:6px;opacity:.5;font-size:.75rem;cursor:pointer" title="Delete page">✕</span></button>`
           ).join('');
         } else {
-          pageTabs.style.display = 'none';
+          pageTabsWrap.style.display = 'none';
         }
       }
 
@@ -1922,6 +1858,11 @@
       saveWorkspacesLocal();
       renderSidebar();
       renderTasks();
+    };
+
+    window.addPageFromMain = function () {
+      if (currentWsId === 'all') return;
+      addPage(currentWsId);
     };
 
     window.deletePage = function (wsId, pageId) {
@@ -2124,8 +2065,8 @@
         const banner = document.getElementById('ws-banner');
         if (banner) banner.style.display = 'none';
         document.getElementById('main-content').style.removeProperty('--ws-color');
-        const pageTabs = document.getElementById('page-tabs');
-        if (pageTabs) pageTabs.style.display = 'none';
+        const pageTabsWrap2 = document.getElementById('page-tabs-wrap');
+        if (pageTabsWrap2) pageTabsWrap2.style.display = 'none';
       } else {
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
