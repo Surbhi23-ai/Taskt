@@ -1223,18 +1223,8 @@
     }
 
 
-    /* WORKSPACE BANNER */
-    #ws-banner {
-      display: none;
-      align-items: center; gap: 1rem;
-      padding: 1rem 1.5rem;
-      border-radius: 14px;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid var(--accent)
-    }
-    #ws-banner .banner-icon { font-size: 2rem; line-height: 1 }
-    #ws-banner .banner-title { font-family: 'Playfair Display',serif; font-size: 1.6rem }
-    #ws-banner .banner-sub { font-size: .8rem; color: var(--text2); margin-top: 2px }
+    /* WORKSPACE HEADER */
+    #ws-header { transition: background .2s, border-left .2s; border-radius: 12px; }
 
     /* PAGE TABS */
     #page-tabs .pg-tab {
@@ -1349,20 +1339,8 @@
             <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> below.
           </div>
 
-          <!-- Workspace banner (shown when workspace selected) -->
-          <div id="ws-banner">
-            <div class="banner-icon" id="banner-icon">💼</div>
-            <div>
-              <div class="banner-title" id="banner-title">Workspace</div>
-              <div class="banner-sub" id="banner-sub">0 active tasks</div>
-            </div>
-            <div style="margin-left:auto">
-              <button class="btn-ghost" id="edit-ws-btn-banner" onclick="editCurrentWs()">✎ Edit</button>
-            </div>
-          </div>
-
           <!-- Workspace header -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <div id="ws-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
             <div>
               <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text)" id="ws-title">All
                 Tasks</div>
@@ -1836,13 +1814,12 @@
 
       // Update header
       const ws = workspaces.find(w => w.id === currentWsId);
+      const wsHeader = document.getElementById('ws-header');
       if (currentWsId === 'all') {
         document.getElementById('ws-title').textContent = 'All Tasks';
         document.getElementById('ws-subtitle').textContent = 'Everything in one place';
         document.getElementById('edit-ws-btn').style.display = 'none';
-        // Hide banner
-        const banner = document.getElementById('ws-banner');
-        if (banner) banner.style.display = 'none';
+        if (wsHeader) { wsHeader.style.background = 'none'; wsHeader.style.borderLeft = 'none'; wsHeader.style.padding = '0'; }
         document.getElementById('main-content').style.removeProperty('--ws-color');
       } else {
         if (ws) {
@@ -1850,18 +1827,12 @@
           const activeCount = getTaskList().filter(t => !t.completed && t.workspace === ws.id).length;
           document.getElementById('ws-subtitle').textContent = activeCount + ' active tasks';
           document.getElementById('edit-ws-btn').style.display = 'block';
-          // Show banner
-          const banner = document.getElementById('ws-banner');
-          if (banner) {
-            banner.style.display = 'flex';
-            banner.style.background = `linear-gradient(135deg, ${ws.color}22 0%, transparent 100%)`;
-            banner.style.borderLeft = `4px solid ${ws.color}`;
-            const bannerIcon = document.getElementById('banner-icon');
-            const bannerTitle = document.getElementById('banner-title');
-            const bannerSub = document.getElementById('banner-sub');
-            if (bannerIcon) bannerIcon.textContent = ws.icon;
-            if (bannerTitle) bannerTitle.textContent = ws.name;
-            if (bannerSub) bannerSub.textContent = activeCount + ' active tasks';
+          if (wsHeader) {
+            wsHeader.style.background = `linear-gradient(135deg, ${ws.color}22 0%, transparent 100%)`;
+            wsHeader.style.borderLeft = `4px solid ${ws.color}`;
+            wsHeader.style.padding = '1rem 1.5rem';
+            wsHeader.style.borderRadius = '12px';
+            wsHeader.style.marginBottom = '1.5rem';
           }
           document.getElementById('main-content').style.setProperty('--ws-color', ws.color);
         }
@@ -2200,9 +2171,9 @@
         document.getElementById('edit-ws-btn').style.display = 'none';
         document.getElementById('ws-title').textContent = { today: 'Today', overdue: 'Overdue', shared: 'Shared with Me', completed: 'Completed' }[f] || 'All Tasks';
         document.getElementById('ws-subtitle').textContent = '';
-        // Hide banner when viewing global views
-        const banner = document.getElementById('ws-banner');
-        if (banner) banner.style.display = 'none';
+        // Reset header styling when viewing global views
+        const wsHeader2 = document.getElementById('ws-header');
+        if (wsHeader2) { wsHeader2.style.background = 'none'; wsHeader2.style.borderLeft = 'none'; wsHeader2.style.padding = '0'; }
         document.getElementById('main-content').style.removeProperty('--ws-color');
         const pageTabsWrap2 = document.getElementById('page-tabs-wrap');
         if (pageTabsWrap2) pageTabsWrap2.style.display = 'none';
