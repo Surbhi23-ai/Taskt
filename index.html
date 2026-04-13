@@ -1886,7 +1886,8 @@
 
     window.selectWorkspace = function (id) {
       currentWsId = id;
-      currentPageId = null;
+      const wsForPages = workspaces.find(w => w.id === id);
+      currentPageId = (wsForPages && wsForPages.pages && wsForPages.pages.length > 0) ? wsForPages.pages[0].id : null;
       currentFilter = 'all';
       // reset tab highlights
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -1897,7 +1898,7 @@
     };
 
     window.selectPage = function (id) {
-      currentPageId = currentPageId === id ? null : id;
+      currentPageId = id;
       renderSidebar();
       renderTasks();
     };
@@ -1944,7 +1945,9 @@
       const ws = workspaces.find(w => w.id === pgModalWsId);
       if (!ws) return;
       if (!ws.pages) ws.pages = [];
-      ws.pages.push({ id: 'pg-' + Date.now(), name, icon: selectedPgEmoji, color: selectedPgColor });
+      const newPgId = 'pg-' + Date.now();
+      ws.pages.push({ id: newPgId, name, icon: selectedPgEmoji, color: selectedPgColor });
+      currentPageId = newPgId;
       saveWorkspacesLocal();
       closePgModal();
       renderSidebar();
