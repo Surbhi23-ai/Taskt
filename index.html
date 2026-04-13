@@ -2068,13 +2068,22 @@
     async function loadTasks() {
       if (DEMO_MODE || !supabase_client) return;
       const email = currentUser.email;
-      const { data, error } = await supabase_client
-        .from('tasks')
-        .select('*')
-        .or(`user_id.eq.${currentUser.id},shared_with.cs.{"${email}"}`)
+      // Fetch own tasks
+      const { data: ownData, error: ownErr } = await supabase_client
+        .from('tasks').select('*')
+        .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
-      if (error) { showToast('Load error: ' + error.message); return; }
-      tasks = data || [];
+      if (ownErr) { showToast('Load error: ' + ownErr.message); return; }
+      // Fetch tasks shared with current user's email
+      const { data: sharedData, error: sharedErr } = await supabase_client
+        .from('tasks').select('*')
+        .contains('shared_with', [email])
+        .order('created_at', { ascending: false });
+      if (sharedErr) { showToast('Load error: ' + sharedErr.message); return; }
+      // Merge, deduplicate by id
+      const merged = [...(ownData || []), ...(sharedData || [])];
+      const seen = new Set();
+      tasks = merged.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
       renderTasks();
       scheduleAllReminders();
     }
