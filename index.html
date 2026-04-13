@@ -2112,7 +2112,7 @@
       if (DEMO_MODE || !supabase_client) return;
       const row = {
         id: task.id,
-        user_id: currentUser.id,
+        user_id: task.uid || currentUser.id,
         title: task.title,
         notes: task.notes || '',
         due_date: task.dueDate || null,
