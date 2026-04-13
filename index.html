@@ -2067,7 +2067,7 @@
     // ─────────────────────────────────────────────
     async function loadTasks() {
       if (DEMO_MODE || !supabase_client) return;
-      const email = currentUser.email;
+      const email = currentUser.email.toLowerCase().trim();
       // Fetch own tasks
       const { data: ownData, error: ownErr } = await supabase_client
         .from('tasks').select('*')
@@ -2461,7 +2461,7 @@
       const email = inp.value.trim().toLowerCase();
       if (!email || !email.includes('@')) { showToast('Enter a valid email'); return; }
       if (shareList.includes(email)) { showToast('Already added'); return; }
-      if (email === currentUser?.email) { showToast("That's your own email!"); return; }
+      if (email === currentUser?.email?.toLowerCase?.()) { showToast("That's your own email!"); return; }
       shareList.push(email); inp.value = '';
       renderShareChips();
     };
@@ -2541,7 +2541,7 @@
       const existing = editingId ? getTaskList().find(t => t.id === editingId) : null;
       const task = {
         id: editingId || crypto.randomUUID(),
-        uid: currentUser.id,
+        uid: existing?.uid || currentUser.id,
         title,
         notes: document.getElementById('m-notes').value.trim(),
         dueDate: document.getElementById('m-due').value,
