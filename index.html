@@ -2081,8 +2081,13 @@
         .contains('shared_with', [email])
         .order('created_at', { ascending: false });
       if (sharedErr) { showToast('Load error: ' + sharedErr.message); return; }
+      // Fetch tasks where owner_email matches (catches tasks with corrupted user_id)
+      const { data: ownedByEmail } = await supabase_client
+        .from('tasks').select('*')
+        .eq('owner_email', email)
+        .order('created_at', { ascending: false });
       // Merge, deduplicate by id
-      const merged = [...(ownData || []), ...(sharedData || [])];
+      const merged = [...(ownData || []), ...(sharedData || []), ...(ownedByEmail || [])];
       const seen = new Set();
       tasks = merged.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
       renderTasks();
@@ -2363,7 +2368,9 @@
         document.getElementById('m-tags').value = (t.tags || []).join(', ');
         document.getElementById('m-workspace').value = t.workspace || '';
         reminders = JSON.parse(JSON.stringify(t.reminders || []));
-        shareList = [...(t.sharedWith || [])];
+        // Filter out the owner's own email from shareList (defensive guard)
+        const ownerMail = (t.ownerEmail || '').toLowerCase().trim();
+        shareList = (t.sharedWith || []).filter(e => e.toLowerCase().trim() !== ownerMail && e.toLowerCase().trim() !== currentUser.email.toLowerCase().trim());
         subtasks = JSON.parse(JSON.stringify(t.subtasks || []));
         subtaskMode = t.subtaskMode || 'checkbox';
         pastedImages = [...(t.images || [])];
@@ -2571,7 +2578,7 @@
         priority: document.getElementById('m-priority').value,
         tags,
         reminders: JSON.parse(JSON.stringify(reminders)),
-        sharedWith: existing && existing.uid !== currentUser.id ? existing.sharedWith : [...shareList],
+        sharedWith: existing && existing.uid !== currentUser.id ? existing.sharedWith : shareList.filter(e => e.toLowerCase().trim() !== currentUser.email.toLowerCase().trim()),
         subtasks: JSON.parse(JSON.stringify(subtasks)),
         subtaskMode,
         images: [...pastedImages],
